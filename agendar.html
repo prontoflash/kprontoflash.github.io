@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agendar Servicio - PRONTOFLASH</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+</head>
+<body>
+
+  <h2>🗓️ Agendar un Servicio</h2>
+  <form id="formAgendar">
+    <input type="text" id="cliente" placeholder="Tu nombre completo" required /><br/>
+    <input type="text" id="telefono" placeholder="Número WhatsApp (sin + ni espacios)" required /><br/>
+    <input type="text" id="placa" placeholder="Placa del vehículo" required /><br/>
+    <select id="servicio" required>
+      <option value="">Selecciona un servicio</option>
+      <option value="Lavado Básico">Lavado Básico</option>
+      <option value="Lavado Completo">Lavado Completo</option>
+      <option value="Lavado Premium">Lavado Premium</option>
+    </select><br/>
+    <input type="date" id="fecha" required /><br/>
+    <input type="time" id="hora" required /><br/>
+    <button type="submit">📨 Agendar</button>
+  </form>
+
+  <div class="navegacion">
+    <a href="demo.html">🔙 Volver a Demo</a>
+    <a href="firma-digital.html">✍️ Ir a Firma Digital</a>
+  </div>
+
+  <script>
+    document.getElementById("formAgendar").addEventListener("submit", function(e) {
+  const hoy = new Date().toISOString().split("T")[0];
+  if (document.getElementById("fecha").value < hoy) {
+    mostrarNotificacion("❌ No puedes agendar una fecha pasada", "error");
+    return;
+  }
+  const cliente = document.getElementById("cliente").value.trim();
+  const fecha = document.getElementById("fecha").value;
+  const hora = document.getElementById("hora").value;
+  const duplicados = (JSON.parse(localStorage.getItem("agendamientos")) || []).some(a => a.cliente === cliente && a.fecha === fecha && a.hora === hora);
+  if (duplicados) {
+    mostrarNotificacion("⚠️ Ya existe un agendamiento para ese cliente en esa fecha y hora", "error");
+    return;
+  }
+      e.preventDefault();
+
+      const cliente = document.getElementById("cliente").value;
+      const telefono = document.getElementById("telefono").value;
+      const placa = document.getElementById("placa").value;
+      const servicio = document.getElementById("servicio").value;
+      const fecha = document.getElementById("fecha").value;
+      const hora = document.getElementById("hora").value;
+
+      const nuevo = {
+        cliente, placa, servicio, fecha, hora, telefono,
+        estadoTecnico: "Pendiente"
+      };
+
+      const agenda = JSON.parse(localStorage.getItem("agendamientos")) || [];
+      agenda.push(nuevo);
+      localStorage.setItem("agendamientos", JSON.stringify(agenda));
+
+      mostrarNotificacion("✅ Servicio agendado correctamente", "exito");
+
+      const mensaje = \`Hola \${cliente}, tu servicio \${servicio} para el vehículo placa \${placa} ha sido agendado para el \${fecha} a las \${hora}. ¡Gracias por usar PRONTOFLASH!\`;
+      const urlWhatsApp = \`https://wa.me/\${telefono}?text=\${encodeURIComponent(mensaje)}\`;
+      window.open(urlWhatsApp, "_blank");
+
+      this.reset();
+    });
+  </script>
+
+
+<style>
+  #notificacion {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #222;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    display: none;
+    z-index: 9999;
+    transition: all 0.5s ease;
+  }
+  #notificacion.exito { background-color: #28a745; }
+  #notificacion.error { background-color: #dc3545; }
+  #notificacion.info { background-color: #007bff; }
+</style>
+
+<div id="notificacion"></div>
+
+<script>
+  function mostrarNotificacion(mensaje, tipo = "info") {
+    const notif = document.getElementById("notificacion");
+    notif.className = tipo;
+    notif.innerText = mensaje;
+    notif.style.display = "block";
+    setTimeout(() => {
+      notif.style.display = "none";
+    }, 4000);
+  }
+</script>
+
+
+  <div class="volver" style="margin-top: 40px;">
+    <a href="index.html">⬅️ Anterior</a>
+    <a href="firma-digital.html">➡️ Siguiente</a>
+  </div>
+
+</body>
+</html>
